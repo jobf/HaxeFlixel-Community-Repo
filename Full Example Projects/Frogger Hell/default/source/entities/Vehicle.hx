@@ -12,8 +12,9 @@ class Vehicle extends FlxSprite {
 
     public var isWaiting:Bool;
 
-    public function new(startX:Int, startY:Int, startVelocity:Float, ?asset:FlxGraphicAsset, destinations:Array<FlxPoint>) {
-        super(startX, startY, asset);
+    public function new(startX:Int, startY:Int, startVelocity:Float, asset:FlxGraphicAsset, destinations:Array<FlxPoint>) {
+        super(startX, startY);
+        loadGraphic(asset, true, 32, 32);
         originX = startX;
         originY = startY;
         originVelocity = startVelocity;
@@ -41,10 +42,26 @@ class Vehicle extends FlxSprite {
 
     override function update(elapsed:Float) {
         super.update(elapsed);
+
+        var direction = {
+            x: velocityToDirection(velocity.x),
+            y: velocityToDirection(velocity.y)
+        };
+
+        this.animation.frameIndex = switch direction {
+            case {x: 0, y: -1}: 0; // up
+            case {x: 0, y: 1}: 1; // down
+            case {x: -1, y: 0}: 3; // left
+            case _: 2; // default (right)
+        };
+    }
+
+    inline function velocityToDirection(vel:Float):Int {
+        return vel == 0 ? 0 : vel < 0 ? -1 : 1;
     }
 
     function startMovingToDestination() {
-        final autoRotate = true;
+        final autoRotate = false;
         path.start(originVelocity, autoRotate);
     }
 }
